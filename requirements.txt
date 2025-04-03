@@ -1,0 +1,8 @@
+numpy<2.0.0
+torch<=2.4.0
+deepspeed<=0.15.3
+datasets
+transformers
+transformers[torch]
+hf_transfer
+wandb
