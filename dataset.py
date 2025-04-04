@@ -148,7 +148,8 @@ class PairwiseRewardDataCollator(BaseDataCollator):
             print(f"Rank {RANK}: First batch of data:")
             print(f"Rank {RANK}: Messages: {messages}")
             print(f"Rank {RANK}: Formatted messages: {formatted_messages}")
-
+            print(f"Rank {RANK}: Labels: {labels}")
+            
             self.first = False
 
         # Tokenize the formatted messages
@@ -164,6 +165,7 @@ class PairwiseRewardDataCollator(BaseDataCollator):
         return dict(
             input_ids=tokenized_messages['input_ids'],
             attention_mask=tokenized_messages['attention_mask'],
+            labels=torch.tensor(labels),
         )
         
         
