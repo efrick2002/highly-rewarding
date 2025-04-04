@@ -16,6 +16,8 @@ def pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=
     Compute the pairwise reward loss.
     """
 
+    print(f"Rank {RANK}: num_items_in_batch: {num_items_in_batch}")
+
     rewards: torch.Tensor = output["rewards"]
 
     print(f"Rank {RANK}: Rewards: {rewards}")

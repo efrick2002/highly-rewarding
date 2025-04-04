@@ -2,6 +2,7 @@ from transformers import PreTrainedModel, PreTrainedTokenizer, AutoTokenizer
 from transformers.utils import ModelOutput
 from dataclasses import dataclass
 from model_type_registry import MODEL_TYPE_REGISTRY
+from losses import REGISTERED_LOSSES
 from torch import nn
 import torch
 from typing import Dict, Callable, List
@@ -38,11 +39,12 @@ def tiny_normal_init(module):
 @dataclass
 class BTRewardOutputs(ModelOutput):
     rewards: torch.FloatTensor = None
+    loss: torch.FloatTensor = None
 
 class ThurstoneRewardOutputs(ModelOutput):
     means: torch.FloatTensor = None
     logvars: torch.FloatTensor = None
-
+    loss: torch.FloatTensor = None
 def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, chat_template: str | None, new_special_tokens: List[str], cls_token: str | None, truncation_side: str = "left") -> PreTrainedTokenizer:
 
     tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(base_model_name)
@@ -83,8 +85,12 @@ def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, cha
 
     return tokenizer
 
+# def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, init_type: str = "reset_params", loss_type: str = "bt-pairwise-reward") -> PreTrainedModel:
+
+
 @register_model_class("bt-reward-model")
 def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, init_type: str = "reset_params") -> PreTrainedModel:
+
     # Should construct and return the model class such that the trainer can call .from_pretrained on it.
     
     transformer_model_cls, pretrained_model_cls = MODEL_TYPE_REGISTRY[model_type]
@@ -92,6 +98,8 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
     init_func = REGISTERED_INITS[init_type]
 
     cls_token = tokenizer.cls_token_id
+
+    # compute_loss_func: Callable = REGISTERED_LOSSES[loss_type]
 
     class RewardPretrainedModel(pretrained_model_cls):
 
@@ -130,35 +138,34 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
         def set_input_embeddings(self, value):
             self.model.embed_tokens = value
 
-        def forward(self, input_ids, attention_mask):
-
+        def forward(self, input_ids, attention_mask)
             hidden_outputs = self.model(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 output_hidden_states=False,
             ).last_hidden_state  # (bs, num_token, embed_dim)
 
-            print(f"Rank {RANK}: hidden_outputs shape: {hidden_outputs.shape}")
+            # print(f"Rank {RANK}: hidden_outputs shape: {hidden_outputs.shape}")
 
-            print(f"Rank {RANK}: input_ids: {input_ids}")
+            # print(f"Rank {RANK}: input_ids: {input_ids}")
 
-            print(f"Rank {RANK}: cls_token: {cls_token}")
+            # print(f"Rank {RANK}: cls_token: {cls_token}")
 
-            print(f"Rank {RANK}: DEBUG: {input_ids == cls_token}")
+            # print(f"Rank {RANK}: DEBUG: {input_ids == cls_token}")
 
             cls_mask = input_ids == cls_token
 
-            print(f"Rank {RANK}: cls_mask shape: {cls_mask.shape}")
+            # print(f"Rank {RANK}: cls_mask shape: {cls_mask.shape}")
 
             cls_hidden_dim = hidden_outputs[cls_mask]
 
-            print(f"Rank {RANK}: cls_hidden_dim shape: {cls_hidden_dim.shape}")
+            # print(f"Rank {RANK}: cls_hidden_dim shape: {cls_hidden_dim.shape}")
 
             # assert cls_hidden_dim.shape[0] == input_ids.shape[0], f"CLS hidden dim shape: {cls_hidden_dim.shape}, input_ids shape: {input_ids.shape}"
 
             rewards = self.head(cls_hidden_dim) # (bs, 1)
 
-            print(f"Rank {RANK}: rewards shape: {rewards.shape}")
+            # print(f"Rank {RANK}: rewards shape: {rewards.shape}")
 
             
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
@@ -166,8 +173,16 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
             
             assert rewards.shape[0]*2 == input_ids.shape[0] and rewards.shape[1] == 2, f"Rewards shape: {rewards.shape}, input_ids shape: {input_ids.shape}"
 
+            # loss = compute_loss_func(
+            #     output={
+            #         "rewards": rewards
+            #     },
+            #     labels=labels,
+            #     num_items_in_batch=input_ids.shape[0]
+            # )
+
             return BTRewardOutputs(
-                rewards=rewards
+                rewards=rewards,
             )
 
     return RewardModel
