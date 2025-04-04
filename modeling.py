@@ -156,11 +156,10 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
 
             # assert cls_hidden_dim.shape[0] == input_ids.shape[0], f"CLS hidden dim shape: {cls_hidden_dim.shape}, input_ids shape: {input_ids.shape}"
 
-            rewards = self.head(cls_hidden_dim)
+            rewards = self.head(cls_hidden_dim) # (bs, 1)
 
             print(f"Rank {RANK}: rewards shape: {rewards.shape}")
 
-            assert False
             
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
             rewards = rewards.view(-1, 2)
