@@ -5,7 +5,7 @@ from model_type_registry import MODEL_TYPE_REGISTRY
 from torch import nn
 import torch
 from typing import Dict, Callable, List
-from utils import get_registry_decorator
+from utils import get_registry_decorator, log_on_main
 import os
 
 RANK = int(os.environ.get("RANK", -1))
@@ -43,7 +43,7 @@ class ThurstoneRewardOutputs(ModelOutput):
     means: torch.FloatTensor = None
     logvars: torch.FloatTensor = None
 
-def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, chat_template: str | None, new_special_tokens: List[str], cls_token_if_none: str | None, truncation_side: str = "left") -> PreTrainedTokenizer:
+def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, chat_template: str | None, new_special_tokens: List[str], cls_token: str | None, truncation_side: str = "left") -> PreTrainedTokenizer:
 
     tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(base_model_name)
 
@@ -53,18 +53,31 @@ def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, cha
 
         tokenizer.pad_token = pad_token_if_none
 
-    if cls_token_if_none != None:
+        log_on_main(f"Pad token set to: {pad_token_if_none}")
 
-        assert tokenizer.cls_token != "<cls>", "Cannot set CLS token to <cls>, which is the placeholder cls token."
+    if cls_token != None:
 
-        tokenizer.cls_token = cls_token_if_none
+        if tokenizer.cls_token == None:
+
+            assert tokenizer.cls_token != "<cls>", "Cannot set CLS token to <cls>, which is the placeholder cls token."
+
+            tokenizer.cls_token = cls_token
+
+            log_on_main(f"CLS token set to: {cls_token}")
+        
+        else:
+
+            log_on_main(f"WARNING: CLS token already set to: {tokenizer.cls_token}, ignoring cls_token argument.")
     
     if chat_template != None:
 
         tokenizer.chat_template = chat_template
 
     if new_special_tokens:
+
         tokenizer.add_special_tokens({"additional_special_tokens": new_special_tokens})
+
+        log_on_main(f"Added {len(new_special_tokens)} new special tokens: {new_special_tokens}")
 
     tokenizer.truncation_side = truncation_side
 

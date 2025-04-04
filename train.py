@@ -50,7 +50,7 @@ def train_model(args):
     chat_template = config.get("chat_template", None)
     # If the tokenizer/model does not already have a pad token, this will be used.
     pad_token_if_none = config.get("pad_token_if_none", "<|pad|>")
-    cls_token_if_none = config.get("cls_token_if_none", "<|cls|>")
+    cls_token = config.get("cls_token", None)
     proj_name = config.get("proj_name", None)
     init_type = config.get("init_type", "reset_params")
     loss_type = config.get("loss_type", None)
@@ -137,7 +137,7 @@ def train_model(args):
         pad_token_if_none=pad_token_if_none,
         chat_template=chat_template,
         new_special_tokens=new_special_tokens,
-        cls_token_if_none=cls_token_if_none,
+        cls_token=cls_token,
         truncation_side=truncation_side,
     )
 
