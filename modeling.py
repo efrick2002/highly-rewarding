@@ -127,6 +127,12 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
 
             print(f"Rank {RANK}: hidden_outputs shape: {hidden_outputs.shape}")
 
+            print(f"Rank {RANK}: input_ids: {input_ids}")
+
+            print(f"Rank {RANK}: cls_token: {cls_token}")
+
+            print(f"Rank {RANK}: DEBUG: {input_ids == cls_token}")
+
             cls_mask = input_ids == cls_token
 
             print(f"Rank {RANK}: cls_mask shape: {cls_mask.shape}")
