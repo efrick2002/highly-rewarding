@@ -11,7 +11,7 @@ gradient_accumulation_steps: 16
 deepspeed_config_path: deepspeed/zero1.json
 loss_type: bt-pairwise-reward
 transformer_type: qwen2
-model_type: bt-reward-model"
+model_type: bt-reward-model
 seed: 42
 cls_token_if_none: '<|cls|>'
 
