@@ -128,7 +128,7 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
             cls_token = tokenizer.cls_token_id
 
             # Since we know there is exactly one CLS token per sequence, we can use argmax
-            cls_token_indices = (input_ids == cls_token).argmax(dim=1)
+            cls_token_indices = torch.nonzero(input_ids == cls_token, as_tuple=True)[1]
             rewards = head_output[torch.arange(head_output.shape[0]), cls_token_indices]
 
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
