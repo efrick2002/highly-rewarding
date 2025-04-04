@@ -6,7 +6,9 @@ from torch import nn
 import torch
 from typing import Dict, Callable, List
 from utils import get_registry_decorator
+import os
 
+RANK = int(os.environ.get("RANK", -1))
 
 REGISTERED_INITS: Dict[str, Callable] = {}
 REGISTERED_MODEL_CLASSES: Dict[str, Callable] = {}
@@ -123,13 +125,23 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
                 output_hidden_states=False,
             ).last_hidden_state  # (bs, num_token, embed_dim)
 
+            print(f"Rank {RANK}: hidden_outputs shape: {hidden_outputs.shape}")
+
             cls_mask = input_ids == cls_token
+
+            print(f"Rank {RANK}: cls_mask shape: {cls_mask.shape}")
 
             cls_hidden_dim = hidden_outputs[cls_mask]
 
-            assert cls_hidden_dim.shape[0] == input_ids.shape[0], f"CLS hidden dim shape: {cls_hidden_dim.shape}, input_ids shape: {input_ids.shape}"
+            print(f"Rank {RANK}: cls_hidden_dim shape: {cls_hidden_dim.shape}")
 
-            rewards = self.head(cls_hidden_dim).squeeze(-1) #(bs,)
+            # assert cls_hidden_dim.shape[0] == input_ids.shape[0], f"CLS hidden dim shape: {cls_hidden_dim.shape}, input_ids shape: {input_ids.shape}"
+
+            rewards = self.head(cls_hidden_dim)
+
+            print(f"Rank {RANK}: rewards shape: {rewards.shape}")
+
+            assert False
             
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
             rewards = rewards.view(-1, 2)
