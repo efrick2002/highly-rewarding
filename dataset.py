@@ -143,7 +143,8 @@ class PairwiseRewardDataCollator(BaseDataCollator):
         
         if self.first:
             print(f"First batch of data:")
-            print(formatted_messages)
+            print("Messages: ", messages)
+            print("Formatted messages: ", formatted_messages)
 
             self.first = False
 
