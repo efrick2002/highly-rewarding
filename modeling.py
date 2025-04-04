@@ -76,6 +76,8 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
 
     init_func = REGISTERED_INITS[init_type]
 
+    cls_token = tokenizer.cls_token_id
+
     class RewardPretrainedModel(pretrained_model_cls):
 
         def _init_weights(self, module):
@@ -120,8 +122,6 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
                 attention_mask=attention_mask,
                 output_hidden_states=False,
             ).last_hidden_state  # (bs, num_token, embed_dim)
-
-            cls_token = tokenizer.cls_token_id
 
             cls_mask = input_ids == cls_token
 
