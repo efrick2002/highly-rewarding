@@ -201,13 +201,17 @@ def train_model(args):
         )
 
     print(RANK, 11)
+
+    compute_loss_func = REGISTERED_LOSSES[loss_type] if loss_type != None else None
     
+    print(f"Rank {RANK}: compute_loss_func of type {loss_type}: {compute_loss_func}")
+
     trainer = NoShuffleTrainer(
         model=model,
         args=training_args,
         train_dataset=train_data.with_format("torch"),
         data_collator=data_collator,
-        compute_loss_func=REGISTERED_LOSSES[loss_type] if loss_type != None else None
+        compute_loss_func=compute_loss_func
     )
 
     print(RANK, 12)
