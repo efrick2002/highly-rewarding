@@ -53,6 +53,8 @@ def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, cha
 
     if cls_token_if_none != None:
 
+        assert tokenizer.cls_token != "<cls>", "Cannot set CLS token to <cls>, which is the placeholder cls token."
+
         tokenizer.cls_token = cls_token_if_none
     
     if chat_template != None:

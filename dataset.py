@@ -6,7 +6,7 @@ from transformers import PreTrainedTokenizer
 import torch
 
 class BaseDataset(ABC):
-    def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False) -> Dataset:
+    def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False, seed=42) -> Dataset:
         pass
 
 class BaseDataCollator(ABC):
@@ -28,7 +28,7 @@ register_collator = get_registry_decorator(REGISTERED_DATASET_COLLATORS)
 
 @register_dataset("singleturn-sft")
 class SingleTurnSFTDataset(BaseDataset):
-    def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False) -> Dataset:
+    def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False, seed=42) -> Dataset:
         # Load formatted dataset from huggingface.
         
         if from_disk:
@@ -41,7 +41,7 @@ class SingleTurnSFTDataset(BaseDataset):
         ]), f"""Missing dataset columns, {train_dataset.features} missing one or more required columns: "messages."""
         
         if shuffle:
-            train_dataset = train_dataset.shuffle(seed=42)
+            train_dataset = train_dataset.shuffle(seed=seed)
         
         return train_dataset.select_columns([
             "messages"
@@ -49,7 +49,7 @@ class SingleTurnSFTDataset(BaseDataset):
 
 @register_dataset("pairwise-reward")
 class PairwiseRewardDataset(BaseDataset):
-    def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False) -> Dataset:
+    def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False, seed=42) -> Dataset:
         # Load formatted dataset from huggingface.
         
         if from_disk:
@@ -58,7 +58,7 @@ class PairwiseRewardDataset(BaseDataset):
             train_dataset = load_dataset(train_dataset_path, split=split)
         
         if shuffle:
-            train_dataset = train_dataset.shuffle(seed=42)
+            train_dataset = train_dataset.shuffle(seed=seed)
 
         assert all([
             "messages" in train_dataset.features,

@@ -52,6 +52,7 @@ def train_model(args):
     model_type = config.get("model_type", None)
     new_special_tokens = config.get("new_special_tokens", {})
     shuffle_dataset = config.get("shuffle_dataset", False)
+    seed = config.get("seed", 42)
 
     LOCAL_RANK = int(os.environ.get("LOCAL_RANK", -1))
 
@@ -135,7 +136,7 @@ def train_model(args):
 
     with training_args.main_process_first(local=args.local_fs):
 
-        train_data = dataset_cls.get_dataset(train_data_path, shuffle=shuffle_dataset)
+        train_data = dataset_cls.get_dataset(train_data_path, shuffle=shuffle_dataset, seed=seed)
 
     if WORLD_RANK <= 0:
         # Document the configuration in the output path.
