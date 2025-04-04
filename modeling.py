@@ -121,16 +121,16 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
                 output_hidden_states=False,
             ).last_hidden_state  # (bs, num_token, embed_dim)
 
-            head_output = self.head(hidden_outputs).squeeze(-1) # (bs, num_token)
-
-            assert head_output.shape == input_ids.shape, f"Head output shape: {head_output.shape}, input_ids shape: {input_ids.shape}"
-
             cls_token = tokenizer.cls_token_id
 
-            # Since we know there is exactly one CLS token per sequence, we can use argmax
-            cls_token_indices = torch.nonzero((input_ids == cls_token).to(torch.long), as_tuple=True)[1]
-            rewards = head_output[torch.arange(head_output.shape[0]), cls_token_indices]
+            cls_mask = input_ids == cls_token
 
+            cls_hidden_dim = hidden_outputs[cls_mask]
+
+            assert cls_hidden_dim.shape[0] == input_ids.shape[0], f"CLS hidden dim shape: {cls_hidden_dim.shape}, input_ids shape: {input_ids.shape}"
+
+            rewards = self.head(cls_hidden_dim).squeeze(-1) #(bs,)
+            
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
             rewards = rewards.view(-1, 2)
             
