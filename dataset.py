@@ -4,6 +4,9 @@ from datasets import Dataset, load_dataset, load_from_disk
 from typing import Dict
 from transformers import PreTrainedTokenizer
 import torch
+import os
+
+RANK = int(os.environ.get("RANK", -1))
 
 class BaseDataset(ABC):
     def get_dataset(train_dataset_path: str, split="train", from_disk=False, shuffle=False, seed=42) -> Dataset:
@@ -142,9 +145,9 @@ class PairwiseRewardDataCollator(BaseDataCollator):
         formatted_messages = [msg + self.tokenizer.cls_token for msg in formatted_messages]
         
         if self.first:
-            print(f"First batch of data:")
-            print("Messages: ", messages)
-            print("Formatted messages: ", formatted_messages)
+            print(f"Rank {RANK}: First batch of data:")
+            print(f"Rank {RANK}: Messages: {messages}")
+            print(f"Rank {RANK}: Formatted messages: {formatted_messages}")
 
             self.first = False
 
