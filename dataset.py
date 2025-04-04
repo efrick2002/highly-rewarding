@@ -149,7 +149,14 @@ class PairwiseRewardDataCollator(BaseDataCollator):
             self.first = False
 
         # Tokenize the formatted messages
-        tokenized_messages = self.tokenizer(formatted_messages, padding=True, truncation=True, max_length=self.max_length, return_tensors="pt")
+        tokenized_messages = self.tokenizer(
+            formatted_messages,
+            padding=True,
+            truncation=True,
+            max_length=self.max_length,
+            return_tensors="pt",
+            add_special_tokens=False,
+        )
         
         return dict(
             input_ids=tokenized_messages['input_ids'],
