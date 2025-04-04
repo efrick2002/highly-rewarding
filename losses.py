@@ -2,16 +2,24 @@ from utils import get_registry_decorator
 from typing import Dict, Callable
 import torch
 from torch.nn import functional as F
+import os
+
+RANK = int(os.environ.get("RANK", -1))
 
 REGISTERED_LOSSES: Dict[str, Callable] = {}
 
 register = get_registry_decorator(REGISTERED_LOSSES)
 
 @register("bt-pairwise-reward")
-def pairwise_reward_loss(rewards: torch.Tensor, labels: torch.Tensor, num_items_in_batch=None) -> torch.Tensor:
+def pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=None) -> torch.Tensor:
     """
     Compute the pairwise reward loss.
     """
+
+    rewards: torch.Tensor = output["rewards"]
+
+    print(f"Rank {RANK}: Rewards: {rewards}")
+
     # The labels are of shape (bs, 2). The second dimension indicates the order of the two messages. We now want to index into the rewards
     # tensor with the labels so we can get the first column as the winner reward, and the second column as the loser reward.
     winner_rewards = rewards[torch.arange(rewards.shape[0]), labels[:, 0]]
@@ -51,10 +59,13 @@ def thurstonian_loss(mu1, logvar1, mu2, logvar2):
 
 
 @register("thurstone-pairwise-reward")
-def thurstone_pairwise_reward_loss(means: torch.Tensor, logvars: torch.Tensor, labels: torch.Tensor, num_items_in_batch=None) -> torch.Tensor:
+def thurstone_pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=None) -> torch.Tensor:
     """
     Compute the thurstone pairwise reward loss.
     """
+
+    means: torch.Tensor = output["means"]
+    logvars: torch.Tensor = output["logvars"]
     
     # The labels are of shape (bs, 2). The second dimension indicates the order of the two messages. We now want to index into the rewards
     # tensor with the labels so we can get the first column as the winner reward, and the second column as the loser reward.
