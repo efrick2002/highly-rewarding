@@ -178,6 +178,8 @@ def train_model(args):
         
         case "reward":
 
+            print(REGISTERED_MODEL_CLASSES)
+
             model_cls = REGISTERED_MODEL_CLASSES[model_type](
                 model_type=transformer_type,
                 init_type=init_type,
