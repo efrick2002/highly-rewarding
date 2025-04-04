@@ -1,4 +1,4 @@
-from utils import get_registry_decorator
+from utils import get_registry_decorator, log_on_main
 from abc import ABC, abstractmethod
 from datasets import Dataset, load_dataset, load_from_disk
 from typing import Dict
@@ -144,10 +144,16 @@ class PairwiseRewardDataCollator(BaseDataCollator):
         # Tokenize the formatted messages
         tokenized_messages = self.tokenizer(formatted_messages, padding=True, truncation=True, max_length=self.max_length, return_tensors="pt")
 
+        if self.first:
+            log_on_main(f"First batch of data:")
+            log_on_main(formatted_messages)
+
+            self.first = False
+            
+        
         return dict(
             input_ids=tokenized_messages['input_ids'],
             attention_mask=tokenized_messages['attention_mask'],
-            labels=torch.tensor(labels),
         )
         
         
