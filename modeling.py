@@ -138,7 +138,7 @@ def get_bt_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, i
         def set_input_embeddings(self, value):
             self.model.embed_tokens = value
 
-        def forward(self, input_ids, attention_mask)
+        def forward(self, input_ids, attention_mask):
             hidden_outputs = self.model(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
