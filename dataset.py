@@ -140,16 +140,15 @@ class PairwiseRewardDataCollator(BaseDataCollator):
         # Now formatted_messages is a list of strings
         # Now we need to add the cls token to the end of each string
         formatted_messages = [msg + self.tokenizer.cls_token for msg in formatted_messages]
-
-        # Tokenize the formatted messages
-        tokenized_messages = self.tokenizer(formatted_messages, padding=True, truncation=True, max_length=self.max_length, return_tensors="pt")
-
+        
         if self.first:
             log_on_main(f"First batch of data:")
             log_on_main(formatted_messages)
 
             self.first = False
-            
+
+        # Tokenize the formatted messages
+        tokenized_messages = self.tokenizer(formatted_messages, padding=True, truncation=True, max_length=self.max_length, return_tensors="pt")
         
         return dict(
             input_ids=tokenized_messages['input_ids'],
