@@ -142,8 +142,8 @@ class PairwiseRewardDataCollator(BaseDataCollator):
         formatted_messages = [msg + self.tokenizer.cls_token for msg in formatted_messages]
         
         if self.first:
-            log_on_main(f"First batch of data:")
-            log_on_main(formatted_messages)
+            print(f"First batch of data:")
+            print(formatted_messages)
 
             self.first = False
 
