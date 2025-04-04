@@ -18,9 +18,16 @@ class NoShuffleTrainer(Trainer):
     
 def train_model(args):
 
+    LOCAL_RANK = int(os.environ.get("LOCAL_RANK", -1))
+
+    WORLD_RANK = int(os.environ.get("WORLD_RANK", -1))
+
+    print(WORLD_RANK, 1)
+
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
 
+    print(WORLD_RANK, 2)
     
     training_type = config["training_type"]
     learning_rate = config["learning_rate"]
@@ -54,12 +61,11 @@ def train_model(args):
     shuffle_dataset = config.get("shuffle_dataset", False)
     seed = config.get("seed", 42)
 
-    LOCAL_RANK = int(os.environ.get("LOCAL_RANK", -1))
-
-    WORLD_RANK = int(os.environ.get("WORLD_RANK", -1))
     
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    
+    print(WORLD_RANK, 3)
 
     if not proj_name:
         proj_name = f"{base_model_name.split('/')[1]}_ts{int(time.time())}"
@@ -81,6 +87,8 @@ def train_model(args):
     else:
         output_path = os.path.dirname(resume_from_checkpoint)
     # danger, might need distributed barrier here
+
+    print(WORLD_RANK, 4)
 
     with open(deepspeed_config_path) as fin:
         deepspeed_config = json.load(fin)
@@ -122,6 +130,8 @@ def train_model(args):
         save_on_each_node=args.local_fs
     )
 
+    print(WORLD_RANK, 5)
+
     tokenizer = get_model_tokenizer(
         base_model_name=base_model_name,
         pad_token_if_none=pad_token_if_none,
@@ -130,13 +140,19 @@ def train_model(args):
         cls_token_if_none=cls_token_if_none,
     )
 
+    print(WORLD_RANK, 6)
+
     data_collator = REGISTERED_DATASET_COLLATORS[data_collator_type](tokenizer=tokenizer, max_length=max_length)
 
     dataset_cls = REGISTERED_DATASET_CLASSES[dataset_type]
 
+    print(WORLD_RANK, 7)
+
     with training_args.main_process_first(local=args.local_fs):
 
         train_data = dataset_cls.get_dataset(train_data_path, shuffle=shuffle_dataset, seed=seed)
+
+    print(WORLD_RANK, 8)
 
     if WORLD_RANK <= 0:
         # Document the configuration in the output path.
@@ -150,6 +166,8 @@ def train_model(args):
 
         with open(os.path.join(output_path, "training_config.json"), "w") as fout:
             json.dump(training_details, fout, indent=1)
+
+    print(WORLD_RANK, 9)
 
     match training_type:
 
@@ -165,6 +183,7 @@ def train_model(args):
                 tokenizer=tokenizer,
             )
 
+    print(WORLD_RANK, 10)
     if resume_from_checkpoint:
 
         log_on_main(f"Loading model from checkpoint: {resume_from_checkpoint}")
@@ -178,6 +197,8 @@ def train_model(args):
         model = model_cls.from_pretrained(
             base_model_name,
         )
+
+    print(WORLD_RANK, 11)
     
     trainer = NoShuffleTrainer(
         model=model,
@@ -186,6 +207,8 @@ def train_model(args):
         data_collator=data_collator,
         compute_loss_func=REGISTERED_LOSSES[loss_type] if loss_type != None else None
     )
+
+    print(WORLD_RANK, 12)
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
         
