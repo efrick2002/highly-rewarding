@@ -51,7 +51,7 @@ def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, cha
 
         assert pad_token_if_none != None, "Set a pad token, since tokenizer doesn't have one."
 
-        tokenizer.pad_token = pad_token_if_none
+        tokenizer.add_special_tokens({"pad_token": pad_token_if_none})
 
         log_on_main(f"Pad token set to: {pad_token_if_none}")
 
@@ -61,9 +61,9 @@ def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, cha
 
             assert tokenizer.cls_token != "<cls>", "Cannot set CLS token to <cls>, which is the placeholder cls token."
 
-            tokenizer.cls_token = cls_token
+            tokenizer.add_special_tokens({"cls_token": cls_token})
 
-            log_on_main(f"CLS token set to: {cls_token}")
+            log_on_main(f"CLS token set to: {tokenizer.cls_token}")
         
         else:
 
