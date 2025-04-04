@@ -148,9 +148,10 @@ def train_model(args):
 
     print(RANK, 7)
 
-    with training_args.main_process_first(local=args.local_fs):
+    # Was causing runpod to hang, so commenting out for now.
+    # with training_args.main_process_first(local=args.local_fs):
 
-        train_data = dataset_cls.get_dataset(train_data_path, shuffle=shuffle_dataset, seed=seed)
+    train_data = dataset_cls.get_dataset(train_data_path, shuffle=shuffle_dataset, seed=seed)
 
     print(RANK, 8)
 
