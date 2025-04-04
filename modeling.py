@@ -41,7 +41,7 @@ class ThurstoneRewardOutputs(ModelOutput):
     means: torch.FloatTensor = None
     logvars: torch.FloatTensor = None
 
-def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, chat_template: str | None, new_special_tokens: List[str], cls_token_if_none: str | None) -> PreTrainedTokenizer:
+def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, chat_template: str | None, new_special_tokens: List[str], cls_token_if_none: str | None, truncation_side: str = "left") -> PreTrainedTokenizer:
 
     tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(base_model_name)
 
@@ -63,6 +63,8 @@ def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, cha
 
     if new_special_tokens:
         tokenizer.add_special_tokens({"additional_special_tokens": new_special_tokens})
+
+    tokenizer.truncation_side = truncation_side
 
     return tokenizer
 

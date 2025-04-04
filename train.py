@@ -60,7 +60,7 @@ def train_model(args):
     new_special_tokens = config.get("new_special_tokens", {})
     shuffle_dataset = config.get("shuffle_dataset", False)
     seed = config.get("seed", 42)
-
+    truncation_side = config.get("truncation_side", None)
     
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -138,6 +138,7 @@ def train_model(args):
         chat_template=chat_template,
         new_special_tokens=new_special_tokens,
         cls_token_if_none=cls_token_if_none,
+        truncation_side=truncation_side,
     )
 
     print(RANK, 6)
