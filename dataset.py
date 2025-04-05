@@ -35,7 +35,7 @@ class SingleTurnSFTDataset(BaseDataset):
         # Load formatted dataset from huggingface.
         
         if from_disk:
-            train_dataset = load_from_disk(train_dataset_path)
+            train_dataset = load_from_disk(train_dataset_path)[split]
         else:
             train_dataset = load_dataset(train_dataset_path, split=split)
         
@@ -56,7 +56,7 @@ class PairwiseRewardDataset(BaseDataset):
         # Load formatted dataset from huggingface.
         
         if from_disk:
-            train_dataset = load_from_disk(train_dataset_path)
+            train_dataset = load_from_disk(train_dataset_path)[split]
         else:
             train_dataset = load_dataset(train_dataset_path, split=split)
         
