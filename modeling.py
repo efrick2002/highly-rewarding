@@ -39,12 +39,11 @@ def tiny_normal_init(module):
 @dataclass
 class BTRewardOutputs(ModelOutput):
     rewards: torch.FloatTensor = None
-    loss: torch.FloatTensor = None
 
 class ThurstoneRewardOutputs(ModelOutput):
     means: torch.FloatTensor = None
     logvars: torch.FloatTensor = None
-    loss: torch.FloatTensor = None
+
 def get_model_tokenizer(base_model_name: str, pad_token_if_none: str | None, chat_template: str | None, new_special_tokens: List[str], cls_token: str | None, truncation_side: str = "left") -> PreTrainedTokenizer:
 
     tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(base_model_name)

@@ -18,6 +18,10 @@ def pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=
 
     print(f"Rank {RANK}: num_items_in_batch: {num_items_in_batch}")
 
+    num_items_in_batch = num_items_in_batch // 2
+
+    print(f"Rank {RANK}: Actual num_items_in_batch: {num_items_in_batch}")
+
     rewards: torch.Tensor = output["rewards"]
 
     print(f"Rank {RANK}: Rewards: {rewards}")
@@ -33,7 +37,11 @@ def pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=
     # Now we compute the losses
     losses = -F.logsigmoid(diff)
 
-    return losses.mean()
+    loss = losses.mean()
+
+    loss = loss / num_items_in_batch
+
+    return loss
 
 
 
