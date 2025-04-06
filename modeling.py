@@ -40,6 +40,7 @@ def tiny_normal_init(module):
 class BTRewardOutputs(ModelOutput):
     rewards: torch.FloatTensor = None
 
+@dataclass
 class ThurstoneRewardOutputs(ModelOutput):
     means: torch.FloatTensor = None
     logvars: torch.FloatTensor = None
