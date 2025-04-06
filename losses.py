@@ -74,6 +74,8 @@ def thurstone_pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items
     Compute the thurstone pairwise reward loss.
     """
 
+    num_items_in_batch = num_items_in_batch // 2
+
     means: torch.Tensor = output["means"]
     logvars: torch.Tensor = output["logvars"]
     
@@ -85,6 +87,10 @@ def thurstone_pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items
     winner_logvars = logvars[torch.arange(logvars.shape[0]), labels[:, 0]]
     loser_logvars = logvars[torch.arange(logvars.shape[0]), labels[:, 1]]
 
-    return thurstonian_loss(winner_means, winner_logvars, loser_means, loser_logvars)
+    loss = thurstonian_loss(winner_means, winner_logvars, loser_means, loser_logvars)
+
+    loss = loss / num_items_in_batch
+
+    return loss
 
 

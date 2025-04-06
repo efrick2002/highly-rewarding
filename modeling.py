@@ -195,6 +195,8 @@ def get_thurstone_reward_model_class(model_type: str, tokenizer: PreTrainedToken
 
     init_func = REGISTERED_INITS[init_type]
 
+    cls_token = tokenizer.cls_token_id
+
     class RewardPretrainedModel(pretrained_model_cls):
 
         def _init_weights(self, module):
@@ -242,11 +244,11 @@ def get_thurstone_reward_model_class(model_type: str, tokenizer: PreTrainedToken
 
             head_output = self.head(hidden_outputs) # (bs, num_token, 2)
 
-            cls_token = tokenizer.cls_token_id
+            cls_mask = input_ids == cls_token
 
-            # Since we know there is exactly one CLS token per sequence, we can use argmax
-            cls_token_indices = (input_ids == cls_token).argmax(dim=1)
-            means_and_logvars = head_output[torch.arange(head_output.shape[0]), cls_token_indices]
+            cls_hidden_dim = hidden_outputs[cls_mask]
+
+            means_and_logvars = self.head(cls_hidden_dim)
 
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
             means = means_and_logvars[:, 0]
@@ -261,7 +263,7 @@ def get_thurstone_reward_model_class(model_type: str, tokenizer: PreTrainedToken
 
             return ThurstoneRewardOutputs(
                 means=means,
-                logvars=logvars
+                logvars=logvars,
             )
 
     return RewardModel
