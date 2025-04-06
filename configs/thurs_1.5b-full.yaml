@@ -12,7 +12,7 @@ gradient_accumulation_steps: 128
 deepspeed_config_path: deepspeed/zero1.json
 loss_type: thurstone-pairwise-reward
 transformer_type: qwen2
-model_type: thurs-reward-model
+model_type: thurstone-reward-model
 seed: 42
 cls_token: <|cls|>
 
