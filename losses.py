@@ -22,7 +22,7 @@ def pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=
 
     # print(f"Rank {RANK}: Actual num_items_in_batch: {num_items_in_batch}")
 
-    rewards: torch.Tensor = output["rewards"]
+    rewards: torch.Tensor = output["rewards"].float()
 
     # print(f"Rank {RANK}: Rewards: {rewards}")
 
@@ -76,8 +76,8 @@ def thurstone_pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items
 
     num_items_in_batch = num_items_in_batch // 2
 
-    means: torch.Tensor = output["means"]
-    logvars: torch.Tensor = output["logvars"]
+    means: torch.Tensor = output["means"].float()
+    logvars: torch.Tensor = output["logvars"].float()
     
     # The labels are of shape (bs, 2). The second dimension indicates the order of the two messages. We now want to index into the rewards
     # tensor with the labels so we can get the first column as the winner reward, and the second column as the loser reward.
