@@ -44,6 +44,26 @@ def pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=
     return loss
 
 
+# @register("grk-pairwise-reward")
+# def grk_pairwise_reward_loss(output: Dict, labels: torch.Tensor, num_items_in_batch=None) -> torch.Tensor:
+#     """
+#     Compute the grk pairwise reward loss.
+#     """
+
+#     num_items_in_batch = num_items_in_batch // 2
+
+#     rewards: torch.Tensor = output["rewards"].float()
+#     thetas: torch.Tensor = output["thetas"].float()
+
+#     # The labels are of shape (bs, 2). The second dimension indicates the order of the two messages. We now want to index into the rewards
+#     # tensor with the labels so we can get the first column as the winner reward, and the second column as the loser reward.
+#     winner_rewards = rewards[torch.arange(rewards.shape[0]), labels[:, 0]]
+#     loser_rewards = rewards[torch.arange(rewards.shape[0]), labels[:, 1]]
+
+    
+
+
+
 
 def thurstonian_loss(mu1, logvar1, mu2, logvar2):
     """

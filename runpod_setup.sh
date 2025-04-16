@@ -1,6 +1,6 @@
 apt-get update -y
 
-apt-get install tmux libaio-dev libopenmpi-dev python3-mpi4py -y
+apt-get install tmux libaio-dev libopenmpi-dev python3-mpi4py python3-dev -y
 
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
