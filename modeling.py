@@ -365,3 +365,100 @@ def get_thurstone_reward_model_class(model_type: str, tokenizer: PreTrainedToken
 
     return RewardModel
 
+
+@register_model_class("decoupled-thurstone-reward-model")
+def get_decoupled_thurstone_reward_model_class(model_type: str, tokenizer: PreTrainedTokenizer, init_type: str = "reset_params") -> PreTrainedModel:
+    # Should construct and return the model class such that the trainer can call .from_pretrained on it.
+    
+    transformer_model_cls, pretrained_model_cls = MODEL_TYPE_REGISTRY[model_type]
+
+    init_func = REGISTERED_INITS[init_type]
+
+    cls_token = tokenizer.cls_token_id
+
+    class RewardPretrainedModel(pretrained_model_cls):
+
+        def _init_weights(self, module):
+            std = self.config.initializer_range
+            if isinstance(module, nn.Linear):
+                init_func(module)  # was reset params
+                if module.bias is not None:
+                    module.bias.data.zero_()
+            elif isinstance(module, nn.Embedding):
+                module.weight.data.normal_(mean=0.0, std=std)
+                if module.padding_idx is not None:
+                    module.weight.data[module.padding_idx].zero_()
+    
+    class RewardModel(RewardPretrainedModel):
+
+        def __init__(
+                self,
+                config,
+                **kwargs,
+        ):
+            super().__init__(config)
+
+            self.model_mean = transformer_model_cls(config)
+
+            self.model_logvar = transformer_model_cls(config)
+
+            self.mean_head = nn.Linear(
+                in_features=config.hidden_size,
+                out_features=1,
+            )
+
+            self.logvar_head = nn.Linear(
+                in_features=config.hidden_size,
+                out_features=1,
+            )
+
+            self.post_init()
+
+        def get_input_embeddings(self):
+            return self.model.embed_tokens
+
+        def set_input_embeddings(self, value):
+            self.model.embed_tokens = value
+
+        def forward(self, input_ids, attention_mask):
+
+            hidden_outputs_mean = self.model_mean(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                output_hidden_states=False,
+            ).last_hidden_state  # (bs, num_token, embed_dim)
+
+            hidden_outputs_logvar = self.model_logvar(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                output_hidden_states=False,
+            ).last_hidden_state  # (bs, num_token, embed_dim)
+
+            cls_mask = input_ids == cls_token
+
+            cls_hidden_dim_mean = hidden_outputs_mean[cls_mask]
+            cls_hidden_dim_logvar = hidden_outputs_logvar[cls_mask]
+
+
+            means = self.mean_head(cls_hidden_dim_mean)
+            logvars = self.logvar_head(cls_hidden_dim_logvar)
+
+
+            # # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
+            # means = means_and_logvars[:, 0]
+            # logvars = means_and_logvars[:, 1]
+            
+            # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
+            means = means.view(-1, 2)
+            logvars = logvars.view(-1, 2)
+            
+            assert means.shape[0]*2 == input_ids.shape[0] and means.shape[1] == 2, f"Means shape: {means.shape}, input_ids shape: {input_ids.shape}"
+            assert logvars.shape == means.shape, f"Logvars shape: {logvars.shape}, means shape: {means.shape}"
+
+            return ThurstoneRewardOutputs(
+                means=means,
+                logvars=logvars,
+            )
+
+    return RewardModel
+
