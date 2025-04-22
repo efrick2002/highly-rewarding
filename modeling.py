@@ -444,10 +444,10 @@ def get_decoupled_thurstone_reward_model_class(model_type: str, tokenizer: PreTr
             means = self.mean_head(cls_hidden_dim_mean)
             logvars = self.logvar_head(cls_hidden_dim_logvar)
 
+            if RANK == 0:
+                print(f"Means shape: {means.shape}")
+                print(f"Logvars shape: {logvars.shape}")
 
-            # # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
-            # means = means_and_logvars[:, 0]
-            # logvars = means_and_logvars[:, 1]
             
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
             means = means.view(-1, 2)
