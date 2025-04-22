@@ -327,6 +327,7 @@ def get_thurstone_reward_model_class(model_type: str, tokenizer: PreTrainedToken
 
             self.post_init()
 
+
         def get_input_embeddings(self):
             return self.model.embed_tokens
 
