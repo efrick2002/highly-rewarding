@@ -1,6 +1,6 @@
 training_type: reward
 learning_rate: 2.0e-6
-batch_size: 1
+batch_size: 2
 train_data_path: full-no-tie-03132025
 load_dataset_from_disk: True
 dataset_type: pairwise-reward
@@ -8,7 +8,7 @@ shuffle_dataset: True
 data_collator_type: pairwise-reward
 base_model_name: p2el/qwen2.5-1.5b-thurstone-decoupled
 max_length: 16384
-gradient_accumulation_steps: 64 # 8 gpus
+gradient_accumulation_steps: 32 # 8 gpus
 deepspeed_config_path: deepspeed/zero1.json
 loss_type: thurstone-pairwise-reward
 transformer_type: qwen2
