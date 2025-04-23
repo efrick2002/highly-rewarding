@@ -5,7 +5,7 @@ from model_type_registry import MODEL_TYPE_REGISTRY
 from losses import REGISTERED_LOSSES
 from torch import nn
 import torch
-from typing import Dict, Callable, List
+from typing import Dict, Callable, List, Optional
 from utils import get_registry_decorator, log_on_main
 import os
 
@@ -378,6 +378,7 @@ def get_decoupled_thurstone_reward_model_class(model_type: str, tokenizer: PreTr
     cls_token = tokenizer.cls_token_id
 
     class RewardPretrainedModel(pretrained_model_cls):
+        base_model_prefix = ""
 
         def _init_weights(self, module):
             std = self.config.initializer_range
@@ -389,6 +390,20 @@ def get_decoupled_thurstone_reward_model_class(model_type: str, tokenizer: PreTr
                 module.weight.data.normal_(mean=0.0, std=std)
                 if module.padding_idx is not None:
                     module.weight.data[module.padding_idx].zero_()
+
+        def _get_key_renaming_mapping(
+            self,
+            checkpoint_keys: List[str],
+            key_mapping: Optional[Dict[str, str]] = None,
+            loading_base_model_from_task_state_dict: bool = False,
+            loading_task_model_from_base_state_dict: bool = False,
+        ):
+            out = {}
+            for key in checkpoint_keys:
+                out[key] = key
+            
+            return out
+
     
     class RewardModel(RewardPretrainedModel):
 
