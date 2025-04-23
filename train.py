@@ -63,8 +63,7 @@ def train_model(args):
     seed = config.get("seed", 42)
     truncation_side = config.get("truncation_side", "left")
     
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
     
     print(RANK, 3)
 
