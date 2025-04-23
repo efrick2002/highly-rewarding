@@ -11,6 +11,7 @@ import time
 from utils import log_on_main, get_git_info
 from modeling import get_model_tokenizer, REGISTERED_MODEL_CLASSES
 from dataset import REGISTERED_DATASET_CLASSES, REGISTERED_DATASET_COLLATORS
+import torch
 
 class NoShuffleTrainer(Trainer):
     def _get_train_sampler(self) -> Optional[Sampler]:
@@ -192,12 +193,14 @@ def train_model(args):
 
         model = model_cls.from_pretrained(
             resume_from_checkpoint,
+            torch_dtype=torch.bfloat16,
         )
 
     else:
 
         model = model_cls.from_pretrained(
             base_model_name,
+            torch_dtype=torch.bfloat16,
         )
 
     print(RANK, 11)
