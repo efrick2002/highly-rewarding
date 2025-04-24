@@ -85,7 +85,7 @@ def thurstonian_loss(mu1, logvar1, mu2, logvar2):
     
     # negative log-likelihood
     nll = -log_cdf
-    return nll.mean()
+    return nll.sum()
 
 
 @register("thurstone-pairwise-reward")
