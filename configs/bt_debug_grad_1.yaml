@@ -1,6 +1,6 @@
 training_type: reward
 learning_rate: 2.0e-6
-batch_size: 1
+batch_size: 16
 train_data_path: evanfrick/rm_debug_data
 dataset_type: pairwise-reward
 shuffle_dataset: True
