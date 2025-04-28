@@ -168,6 +168,47 @@ class PairwiseRewardDataCollator(BaseDataCollator):
             labels=torch.vstack(labels),
         )
         
+@register_collator("double-cls-pairwise-reward")
+class DoubleClsPairwiseRewardDataCollator(BaseDataCollator):
+    def __call__(self, data):
+        
+        messages = [message for row in data for message in row['messages']] # Unroll pairs.
+        labels = [row['labels'] for row in data]
+
+        # Format messages with chat template. Do not tokenize.
+        formatted_messages = self.tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)
+
+        # We want to remove the cls token if it happens to be in the formatted messages.
+        formatted_messages = [msg.replace(self.tokenizer.cls_mean, "<cls_mean>").replace(self.tokenizer.cls_logvar, "<cls_logvar>") for msg in formatted_messages]
+
+        # Now formatted_messages is a list of strings
+        # Now we need to add the cls token to the end of each string
+        formatted_messages = [msg + self.tokenizer.cls_mean +  self.tokenizer.cls_logvar for msg in formatted_messages]
+        
+        if self.first:
+            print(f"Rank {RANK}: First batch of data:")
+            print(f"Rank {RANK}: Messages: {messages}")
+            print(f"Rank {RANK}: Formatted messages: {formatted_messages}")
+            print(f"Rank {RANK}: Labels: {labels}")
+
+            self.first = False
+
+        # Tokenize the formatted messages
+        tokenized_messages = self.tokenizer(
+            formatted_messages,
+            padding=True,
+            truncation=True,
+            max_length=self.max_length,
+            return_tensors="pt",
+            add_special_tokens=False,
+        )
+        
+        return dict(
+            input_ids=tokenized_messages['input_ids'],
+            attention_mask=tokenized_messages['attention_mask'],
+            labels=torch.vstack(labels),
+        )
+        
         
         
         

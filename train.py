@@ -52,6 +52,8 @@ def train_model(args):
     # If the tokenizer/model does not already have a pad token, this will be used.
     pad_token_if_none = config.get("pad_token_if_none", "<|pad|>")
     cls_token = config.get("cls_token", None)
+    cls_mean_token = config.get("cls_mean_token", None)
+    cls_logvar_token = config.get("cls_logvar_token", None)
     proj_name = config.get("proj_name", None)
     init_type = config.get("init_type", "reset_params")
     loss_type = config.get("loss_type", None)
@@ -140,6 +142,8 @@ def train_model(args):
         new_special_tokens=new_special_tokens,
         cls_token=cls_token,
         truncation_side=truncation_side,
+        cls_mean_token=cls_mean_token,
+        cls_logvar_token=cls_logvar_token,
     )
 
     print(RANK, 6)
