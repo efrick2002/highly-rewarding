@@ -8,8 +8,6 @@ import torch
 from typing import Dict, Callable, List, Optional
 from utils import get_registry_decorator, log_on_main
 import os
-from torch.amp import autocast
-
 
 RANK = int(os.environ.get("RANK", -1))
 
@@ -477,7 +475,7 @@ def get_thurstone_mlp_reward_model_class(
                     in_features=config.hidden_size*4,
                     out_features=1,
                 ),
-            ).to(torch.float32)  # Cast to float32 to avoid discretization
+            )
 
             self.post_init()
 
@@ -500,9 +498,7 @@ def get_thurstone_mlp_reward_model_class(
             cls_hidden_dim = hidden_outputs[cls_mask]
 
             means = self.mean_head(cls_hidden_dim)
-
-            with autocast("cuda", enabled=False):
-                logvars = self.logvar_head(cls_hidden_dim.float())
+            logvars = self.logvar_head(cls_hidden_dim)
 
             # The pairwise rewards are flattened, so we need to unflatten them. For now, we will assume it is always pairwise.
             means = means.view(-1, 2)
