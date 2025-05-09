@@ -198,6 +198,7 @@ def train_model(args):
         model = model_cls.from_pretrained(
             resume_from_checkpoint,
             torch_dtype=torch.bfloat16,
+            attn_implementation="flash_attention_2",
         )
 
     else:
@@ -205,6 +206,7 @@ def train_model(args):
         model = model_cls.from_pretrained(
             base_model_name,
             torch_dtype=torch.bfloat16,
+            attn_implementation="flash_attention_2",
         )
 
     print(RANK, 11)
