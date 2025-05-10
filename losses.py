@@ -3,6 +3,7 @@ from typing import Dict, Callable
 import torch
 from torch.nn import functional as F
 import os
+import math
 
 RANK = int(os.environ.get("RANK", -1))
 
@@ -124,7 +125,7 @@ def fixed_thurstonian_loss(mu1, mu2):
     """
 
     # difference standard deviation: sqrt(var1 + var2)
-    denom = torch.sqrt(2)
+    denom = math.sqrt(2)
     z = (mu1 - mu2) / denom
     
     # Use torch.special.log_ndtr for a numerically stable computation of log(Φ(z))
